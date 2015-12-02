@@ -16,14 +16,16 @@
 //  Variables
 int pulsePin = 0;                 // Pulse Sensor purple wire connected to analog pin 0
 int blinkPin = 13;                // pin to blink led at each beat
-int s1Red = 5;                  // pin to do fancy classy fading blink at each beat
-int s1Green = 6;
-int s2Green = 9;
-int s2Red = 10;
-int s1RedFade = 0;                 // used to fade LED on with PWM on s1Red
-int s1GreenFade = 0;
-int s2GreenFade = 0;
-int s2RedFade = 0;
+int innerBlue = 5;                  // 5 = blue, 6 = green (inside), 9 = red, 10 = blue
+int innerGreen = 6;
+int outerRed = 9;
+int outerBlue = 10;
+int innerBlueFade = 0;                 // used to fade LED on with PWM on innerBlue
+int innerGreenFade = 0;
+int outerRedFade = 0;
+int outerBlueFade = 0;
+
+int loopcount = 0;
 
 // Volatile Variables, used in the interrupt service routine!
 volatile int BPM;                   // int that holds raw Analog in 0. updated every 2mS
@@ -38,10 +40,10 @@ static boolean serialVisual = false;   // Set to 'false' by Default.  Re-set to 
 
 void setup() {
   pinMode(blinkPin, OUTPUT);        // pin that will blink to your heartbeat!
-  pinMode(s1Red, OUTPUT);         // pin that will fade to your heartbeat!
-  pinMode(s1Green, OUTPUT);
-  pinMode(s2Green, OUTPUT);
-  pinMode(s2Red, OUTPUT);
+  pinMode(innerBlue, OUTPUT);         // pin that will fade to your heartbeat!
+  pinMode(innerGreen, OUTPUT);
+  pinMode(outerRed, OUTPUT);
+  pinMode(outerBlue, OUTPUT);
 
   Serial.begin(115200);             // we agree to talk fast!
 
@@ -57,20 +59,29 @@ void setup() {
   //   analogReference(EXTERNAL);
 }
 
-
+int idlecounter = 0;
 //  Where the Magic Happens
 void loop() {
-  //  analogWrite(s1Red, 255);
-  //  analogWrite(s1Green, 0);
-  analogWrite(s2Green, 50);
-  analogWrite(s2Red, 255);
+//    analogWrite(innerBlue, 255);
+//    analogWrite(innerGreen, 0);
+//  analogWrite(outerRed, 0);
+//  analogWrite(outerBlue, 255);
 
   // good values! = green @ 50, blue @ 255);
-  //
+
+
+  
 
   serialOutput() ;
 
+//  if (idlecounter >= 30) {
+//    analogWrite(outerBlue, 0);
+//    analogWrite(outerRed, 0);
+//  }
+
   if (QS == true) {    // A Heartbeat Was Found
+    // reset idle counter
+    idlecounter = 0;
     // BPM and IBI have been Determined
     // Quantified Self "QS" true when arduino finds a heartbeat
     //    Serial.print("loop running");
@@ -78,33 +89,41 @@ void loop() {
     //    int pulseReading = map(analogRead(A0), 0,1023, 0,255);
     //    analogWrite(5, pulseReading);
     digitalWrite(blinkPin, HIGH);    // Blink LED, we got a beat.
-    s1RedFade = 255;         // Makes the LED Fade Effect Happen
-    s1GreenFade = 140;
-    // Set 's1RedFade' Variable to 255 to fade LED with pulse
+    innerBlueFade = 255;         // Makes the LED Fade Effect Happen
+    innerGreenFade = 140;
+    outerBlueFade = 255;
+    outerRedFade = 255;
+    // Set 'innerBlueFade' Variable to 255 to fade LED with pulse
 
     if (Serial.available() > 0) {
       int inByte = Serial.read();
       serialOutputWhenBeatHappens();   // A Beat Happened, Output that to serial.
     }
     QS = false;                      // reset the Quantified Self flag for next time
+  } else {
+    idlecounter++;
   }
 
   ledFadeToBeat();                      // Makes the LED Fade Effect Happen
   delay(20);                             //  take a break
+
+  loopcount++;
 }
 
 void ledFadeToBeat() {
-  s1RedFade -= 5;   //  set LED fade value
-  s1GreenFade -= 10;
-  s2GreenFade = s1RedFade;
-  s2RedFade = s1RedFade;
-  //Serial.println(s1GreenFade);
-  s1RedFade = constrain(s1RedFade, 50, 255); //  keep LED fade value from going into negative numbers!
-  s1GreenFade = constrain(s1GreenFade, 20, 140);
-  analogWrite(s1Red, s1RedFade);         //  fade LED
-  analogWrite(s1Green, s1GreenFade);
-  //  analogWrite(s2Green, s2GreenFade);         //  fade LED
-  //  analogWrite(s2Red, s2GreenFade);
+  innerBlueFade -= 5;   //  set LED fade value
+  innerGreenFade -= 5;
+  outerRedFade -= 5;
+  outerBlueFade -= 10;
+  //Serial.println(innerGreenFade);
+  innerBlueFade = constrain(innerBlueFade, 0,200); //  keep LED fade value from going into negative numbers!
+  innerGreenFade = constrain(innerGreenFade, 0, 110);
+  outerBlueFade = constrain(outerBlueFade, 100, 200);
+  outerRedFade = constrain(outerRedFade, 20,255);
+  analogWrite(innerBlue, innerBlueFade);         //  fade LED
+  analogWrite(innerGreen, innerGreenFade);
+  analogWrite(outerBlue, outerBlueFade);
+  analogWrite(outerRed, outerRedFade);
 }
 
 

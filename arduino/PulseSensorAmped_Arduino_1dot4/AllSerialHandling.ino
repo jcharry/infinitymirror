@@ -16,6 +16,7 @@ void serialOutput() {  // Decide How To Output Serial.
 
 //  Decides How To OutPut BPM and IBI Data
 void serialOutputWhenBeatHappens() {
+  
   if (serialVisual == true) {           //  Code to Make the Serial Monitor Visualizer Work
     Serial.print("*** Heart-Beat Happened *** ");  //ASCII Art Madness
     //    Serial.print("BPM: ");
@@ -26,7 +27,7 @@ void serialOutputWhenBeatHappens() {
     //        sendDataToSerial('Q',IBI);   // send time between beats with a 'Q' prefix
     //       Serial.println('x');
     Serial.println(BPM);
-    delay(1);
+//    delay(1);
 
   }
 }
