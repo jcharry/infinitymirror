@@ -48,7 +48,7 @@ void setup() {
   Serial.begin(115200);             // we agree to talk fast!
 
   // start of handshaking
-  while (Serial.available() <= 0) {
+  if(Serial.available() <= 0) {
     Serial.println("no data"); // send a starting message
     delay(300);              // wait 1/3 second
   }
