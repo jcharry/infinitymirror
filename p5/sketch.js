@@ -3,6 +3,9 @@ var portName = '/dev/cu.usbmodem1421';
 var inData = 0;
 var sound;
 
+var startupsound1;
+var startupsound2;
+
 function preload() {
   beat = loadSound('assets/beat.mp3');
   beat2 = loadSound('assets/beat2.mp3');
@@ -10,7 +13,9 @@ function preload() {
   drumbeat = loadSound('assets/drumbeat.wav');
   singlebeat = loadSound('assets/singlebeat.wav');
   hb1 = loadSound('assets/HB1.mp3');
-  hb = loadSound('assets/HB.mp3')
+  hb = loadSound('assets/HB.mp3');
+  startupsound1 = loadSound('assets/1.wav');
+  startupsound2 = loadSound('assets/3.wav');
 }
 
 function setup() {
@@ -39,15 +44,28 @@ function portOpen() {
 }
 
 function serialEvent() {
-  var bpm = serial.readLine();
-  print('bpm: ' + bpm);
-  if (!bpm) {
+  var data = serial.readLine();
+  print('data: ' + data);
+
+  if (!data) {
     return false;
   }
 
-  if (bpm.length > 0) {
-    hb1.play();
-    serial.write('x');
+
+
+  if (data.length > 0) {
+    
+    console.log(Number(data));
+    
+    if (data == "startup") {
+      // play startup audio
+      console.log('startup');
+      startupsound2.play();
+    }
+    if (Number(data) !== NaN) {
+      hb1.play();
+      serial.write('x');
+    }
   }
 
   // if (data.length !== 0 && (inData != data)) {
