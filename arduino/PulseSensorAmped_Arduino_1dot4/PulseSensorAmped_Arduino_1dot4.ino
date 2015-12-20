@@ -72,6 +72,11 @@ int igVal = 0;
 int orVal = 0;
 int obVal = 0;
 
+int psThresh = 200;
+int beatCounter = 0;
+int beatCounterThresh = 40;
+int randomSeedValue = 10;
+
 //  Where the Magic Happens
 void loop() {
   //  Serial.print("memory: ");
@@ -85,7 +90,7 @@ void loop() {
   // check photoresistor value at the start of every loop
   int psval = analogRead(photoresistorPin);
   // if a hand is present (the value is low), and we haven't yet initialized, start up
-  if (psval < 100 && initializing == false) {
+  if (psval < psThresh && initializing == false) {
     // run start up routine
     // send byte to tell p5 to start playing start-up audio
     Serial.println("startup");
@@ -113,20 +118,6 @@ void loop() {
       analogWrite(outerBlue, outerB);
       delay(30);
     }
-
-    //    for (long i = 0; i < initializeLength; i++) {
-    //      int mappedValue = map(i, 0, initializeLength, 0, 255);
-    //      int innerBlueMV = map(i, 0, initializeLength, 0, 100);
-    //      int innerGreenMV = map(i, 0, initializeLength, 20, 255);
-    //      int outerRedMV = map(i, 0, initializeLength, 20, 255);
-    //      int outerBlueMV = map(i, 0, initializeLength, 20, 255);
-    //
-    //      analogWrite(innerGreen, innerGreenMV);
-    //      analogWrite(innerBlue, innerBlueMV);
-    //      analogWrite(outerRed, mappedValue);
-    //      analogWrite(outerBlue, mappedValue);
-    //    }
-
     // ensure this won't run again by setting initialize = true
     initializing = true;
   }
@@ -135,8 +126,18 @@ void loop() {
 
   //  serialOutput();
 //  Serial.println(psval);
-  if ( (QS == true) && (psval < 100) ) {    // A Heartbeat Was Found, and resistor value is low (prevents false positives)
+  beatCounter++;
+  beatCounter = constrain(beatCounter, 0, 150);
+//  Serial.print("beat counter: ");
+//  Serial.println(beatCounter);
+//  Serial.print("ps value: ");
+//  Serial.println(psval);
+  int randomThresh = beatCounterThresh + random(-randomSeedValue, randomSeedValue);
+//  Serial.print("random threshold value: ");
+//  Serial.println(randomThresh);
+  if ( (beatCounter > randomThresh) && (psval < psThresh) ) {    // A Heartbeat Was Found, and resistor value is low (prevents false positives)
     // set maxspeed 
+    beatCounter = 0;
     noHBcounter = 0;
     // BPM and IBI have been Determined
     // Quantified Self "QS" true when arduino finds a heartbeat
@@ -154,11 +155,11 @@ void loop() {
 //      int inByte = Serial.read();
       serialOutputWhenBeatHappens();   // A Beat Happened, Output that to serial.
 //    }
-    QS = false;                      // reset the Quantified Self flag for next time
+//    QS = false;                      // reset the Quantified Self flag for next time
   } else {  // no beat was found
     noHBcounter++;                   // add to the counter to track how long between found beats
     noHBcounter = constrain(noHBcounter, 0, 1001);  // constrain counter to prevent overflow
-    if (noHBcounter > 500) {  // if the counter is above a certain wait time, reset initializing flag to allow for start up routine to run again
+    if (noHBcounter > 200) {  // if the counter is above a certain wait time, reset initializing flag to allow for start up routine to run again
       initializing = false;
     }
   }

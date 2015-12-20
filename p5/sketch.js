@@ -14,7 +14,6 @@ function preload() {
   singlebeat = loadSound('assets/singlebeat.wav');
   hb1 = loadSound('assets/HB1.mp3');
   hb = loadSound('assets/HB.mp3');
-  startupsound1 = loadSound('assets/1.wav');
   startupsound2 = loadSound('assets/3.wav');
 }
 
@@ -62,9 +61,8 @@ function serialEvent() {
       console.log('startup');
       startupsound2.play();
     }
-    if (Number(data) !== NaN) {
+    if (data == "beat") {
       hb1.play();
-      serial.write('x');
     }
   }
 

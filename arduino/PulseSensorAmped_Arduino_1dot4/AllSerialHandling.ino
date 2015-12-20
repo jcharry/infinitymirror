@@ -26,7 +26,7 @@ void serialOutputWhenBeatHappens() {
     //        sendDataToSerial('B',BPM);   // send heart rate with a 'B' prefix
     //        sendDataToSerial('Q',IBI);   // send time between beats with a 'Q' prefix
     //       Serial.println('x');
-    Serial.println(BPM);
+    Serial.println("beat");
 //    delay(1);
 
   }
