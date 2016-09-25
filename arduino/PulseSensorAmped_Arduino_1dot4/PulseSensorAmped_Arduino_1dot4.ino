@@ -13,6 +13,8 @@
   ----------------------       ----------------------  ----------------------
 */
 
+/* This is v2 */
+
 //  Variables
 int pulsePin = 0;                 // Pulse Sensor purple wire connected to analog pin 0
 int blinkPin = 13;                // pin to blink led at each beat
@@ -72,7 +74,7 @@ int igVal = 0;
 int orVal = 0;
 int obVal = 0;
 
-int psThresh = 200;
+int psThresh = 250;
 int beatCounter = 0;
 int beatCounterThresh = 40;
 int randomSeedValue = 10;
@@ -88,7 +90,9 @@ void loop() {
   // must restart when heartbeat is not found for x seconds
 
   // check photoresistor value at the start of every loop
-  int psval = analogRead(photoresistorPin);
+  int psval = analogRead(A0);
+//  Serial.print("value: ");
+  Serial.println(psval);
   // if a hand is present (the value is low), and we haven't yet initialized, start up
   if (psval < psThresh && initializing == false) {
     // run start up routine
@@ -116,7 +120,7 @@ void loop() {
       analogWrite(innerBlue, innerB);
       analogWrite(outerRed, outerR);
       analogWrite(outerBlue, outerB);
-      delay(30);
+      delay(20);
     }
     // ensure this won't run again by setting initialize = true
     initializing = true;
@@ -133,8 +137,15 @@ void loop() {
 //  Serial.print("ps value: ");
 //  Serial.println(psval);
   int randomThresh = beatCounterThresh + random(-randomSeedValue, randomSeedValue);
+  randomThresh = 100;
 //  Serial.print("random threshold value: ");
 //  Serial.println(randomThresh);
+
+  
+  if (psval > psThresh) {
+    // There's no hand currently there
+    Serial.println("no hand");
+  }
   if ( (beatCounter > randomThresh) && (psval < psThresh) ) {    // A Heartbeat Was Found, and resistor value is low (prevents false positives)
     // set maxspeed 
     beatCounter = 0;
@@ -159,7 +170,7 @@ void loop() {
   } else {  // no beat was found
     noHBcounter++;                   // add to the counter to track how long between found beats
     noHBcounter = constrain(noHBcounter, 0, 1001);  // constrain counter to prevent overflow
-    if (noHBcounter > 200) {  // if the counter is above a certain wait time, reset initializing flag to allow for start up routine to run again
+    if (noHBcounter > 100) {  // if the counter is above a certain wait time, reset initializing flag to allow for start up routine to run again
       initializing = false;
     }
   }
@@ -195,7 +206,3 @@ void ledFadeToBeat() {
   analogWrite(outerBlue, outerBlueFade);
   analogWrite(outerRed, outerRedFade);
 }
-
-
-
-

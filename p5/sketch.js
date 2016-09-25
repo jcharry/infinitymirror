@@ -1,24 +1,30 @@
+/* eslint-disable */
 var serial;
 var portName = '/dev/cu.usbmodem1421';
 var inData = 0;
 var sound;
+var isAudioPlaying;
 
-var startupsound1;
-var startupsound2;
+//var startupsound1;
+//var startupsound2;
+var audioTrack;
+var beat;
 
 function preload() {
-  beat = loadSound('assets/beat.mp3');
-  beat2 = loadSound('assets/beat2.mp3');
-  doublebeat = loadSound('assets/doublebeat.wav');
-  drumbeat = loadSound('assets/drumbeat.wav');
-  singlebeat = loadSound('assets/singlebeat.wav');
-  hb1 = loadSound('assets/HB1.mp3');
-  hb = loadSound('assets/HB.mp3');
-  startupsound2 = loadSound('assets/3.wav');
+  //beat = loadSound('assets/beat.mp3');
+  //beat2 = loadSound('assets/beat2.mp3');
+  //doublebeat = loadSound('assets/doublebeat.wav');
+  //drumbeat = loadSound('assets/drumbeat.wav');
+  //singlebeat = loadSound('assets/singlebeat.wav');
+  beat = loadSound('assets/new-beat.mp3');
+  //hb = loadSound('assets/HB.mp3');
+  audioTrack = loadSound('assets/plasmic-reflection-no-beat.mp3');
 }
 
 function setup() {
   createCanvas(600, 400);
+  audioTrack.loop();
+  audioTrack.pause();
 
   serial = new p5.SerialPort(); // make a new instance of the serialport library
   serial.on('list', printList); // set a callback function for the serialport list event
@@ -44,25 +50,32 @@ function portOpen() {
 
 function serialEvent() {
   var data = serial.readLine();
-  print('data: ' + data);
+  //print('data: ' + data);
 
   if (!data) {
     return false;
   }
 
-
-
   if (data.length > 0) {
-    
-    console.log(Number(data));
-    
+    //console.log(Number(data));
     if (data == "startup") {
       // play startup audio
-      console.log('startup');
-      startupsound2.play();
+        isAudioPlaying = true;
+      audioTrack.play();
     }
     if (data == "beat") {
-      hb1.play();
+      beat.play();
+    }
+
+    if (data == "no hand" && isAudioPlaying) {
+        console.log('hand was lifted, fade music');
+        isAudioPlaying = false;
+        //var timer = 1;
+        //audioTrack.setVolume(0.1, 500);
+        audioTrack.setVolume(0.01, 1);
+        setTimeout(function() {
+            audioTrack.pause();
+        }, 1000);
     }
   }
 
